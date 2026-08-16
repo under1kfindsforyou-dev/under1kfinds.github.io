@@ -42,6 +42,16 @@ body{
   place-items: center;
   padding: 24px;
 }
+/* Without this, `display: grid` above always wins over the browser's
+   built-in [hidden]{display:none} rule at equal specificity, so
+   loginView.hidden = true (set in admin.js after a successful login)
+   had no visible effect and the login screen stayed on top forever. */
+.login-screen[hidden]{
+  display: none;
+}
+.dashboard[hidden]{
+  display: none;
+}
 .login-card{
   width: 100%;
   max-width: 380px;
