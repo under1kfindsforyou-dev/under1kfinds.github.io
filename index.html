@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Under1KFinds</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ===================== LOGIN VIEW ===================== -->
+<section id="loginView" class="login-screen">
+  <div class="login-card">
+    <p class="login-mark">UNDER<span class="accent">1K</span>FINDS</p>
+    <h1>Admin login</h1>
+    <p class="login-sub">Only you can sign in here.</p>
+
+    <form id="loginForm">
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="loginEmail" required autocomplete="username">
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </label>
+      <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Log in</button>
+      <p class="login-error" id="loginError" hidden></p>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD VIEW ===================== -->
+<div id="dashboardView" class="dashboard" hidden>
+
+  <header class="admin-header">
+    <p class="admin-header-title">Under1KFinds <span class="accent">Admin</span></p>
+    <button class="logout-btn" id="logoutBtn">Log out</button>
+  </header>
+
+  <main class="admin-main">
+
+    <!-- ---------- OVERVIEW ---------- -->
+    <section class="tab-panel" id="panel-overview">
+      <h2 class="panel-title">Overview</h2>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <p class="stat-num" id="statTotal">–</p>
+          <p class="stat-label">Total products</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-num" id="statVisible">–</p>
+          <p class="stat-label">Visible on store</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-num" id="statFeatured">–</p>
+          <p class="stat-label">Featured</p>
+        </div>
+      </div>
+
+      <h3 class="section-subtitle">By category</h3>
+      <div class="chip-list" id="categoryStats"></div>
+
+      <h3 class="section-subtitle">Recently added</h3>
+      <div class="recent-list" id="recentList"></div>
+    </section>
+
+    <!-- ---------- ADD PRODUCT ---------- -->
+    <section class="tab-panel" id="panel-add" hidden>
+      <h2 class="panel-title">Add product</h2>
+
+      <form id="productForm">
+        <input type="hidden" id="productId" value="">
+
+        <label class="field">
+          <span>Product name</span>
+          <input type="text" id="f_name" required placeholder="e.g. boAt Bassheads 300C">
+        </label>
+
+        <label class="field">
+          <span>Product image</span>
+          <input type="file" id="f_imageFile" accept="image/*">
+          <span class="field-hint">Uploads to your Supabase image storage. Or paste a URL below instead.</span>
+          <input type="url" id="f_imageUrl" placeholder="https://... (optional if uploading a file)">
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Price (₹)</span>
+            <input type="number" id="f_price" required min="0" step="1" inputmode="numeric">
+          </label>
+          <label class="field">
+            <span>MRP (₹)</span>
+            <input type="number" id="f_mrp" min="0" step="1" inputmode="numeric">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Discount % (leave blank to auto-calculate from price/MRP)</span>
+          <input type="number" id="f_discount" min="0" max="99" step="1" inputmode="numeric">
+        </label>
+
+        <label class="field">
+          <span>Categories</span>
+          <div class="checkbox-grid" id="categoryCheckboxes"></div>
+        </label>
+
+        <label class="field">
+          <span>Description</span>
+          <textarea id="f_description" rows="3" placeholder="One short line — what it is, why it's useful"></textarea>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Rating (0–5, optional)</span>
+            <input type="number" id="f_rating" min="0" max="5" step="0.1" inputmode="decimal">
+          </label>
+          <label class="field">
+            <span>Review count (optional)</span>
+            <input type="number" id="f_reviews" min="0" step="1" inputmode="numeric">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Amazon affiliate link</span>
+          <input type="url" id="f_link" required placeholder="https://amzn.to/...">
+        </label>
+
+        <label class="toggle-field">
+          <input type="checkbox" id="f_featured">
+          <span>Featured product (shown first on the store)</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block" id="saveBtn">Publish</button>
+        <button type="button" class="btn btn-ghost btn-block" id="cancelEditBtn" hidden>Cancel edit</button>
+        <p class="form-status" id="formStatus" hidden></p>
+      </form>
+    </section>
+
+    <!-- ---------- MANAGE PRODUCTS ---------- -->
+    <section class="tab-panel" id="panel-manage" hidden>
+      <h2 class="panel-title">Manage products</h2>
+
+      <div class="search-box admin-search">
+        <input type="text" id="manageSearch" placeholder="Search your products…">
+      </div>
+
+      <div class="manage-list" id="manageList"></div>
+    </section>
+
+  </main>
+
+  <!-- ---------- BOTTOM TAB BAR (thumb-friendly) ---------- -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="overview">
+      <span class="tab-icon">📊</span><span>Overview</span>
+    </button>
+    <button class="tab-btn" data-tab="add">
+      <span class="tab-icon">➕</span><span>Add</span>
+    </button>
+    <button class="tab-btn" data-tab="manage">
+      <span class="tab-icon">🗂️</span><span>Manage</span>
+    </button>
+  </nav>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="../supabase-config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
