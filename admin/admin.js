@@ -31,7 +31,8 @@ const loginError = document.getElementById("loginError");
 const loginBtn = document.getElementById("loginBtn");
 
 async function checkSession() {
-  const { data } = await sb.auth.getSession();
+  const { data, error } = await sb.auth.getSession();
+  console.log("[under1kfinds] checkSession() ->", { data, error });
   if (data.session) {
     showDashboard();
   } else {
@@ -49,16 +50,40 @@ loginForm.addEventListener("submit", async (e) => {
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
 
-  const { error } = await sb.auth.signInWithPassword({ email, password });
+  const signInResult = await sb.auth.signInWithPassword({ email, password });
+  console.log("[under1kfinds] signInWithPassword() ->", signInResult);
+  const { data: signInData, error } = signInResult;
 
   loginBtn.textContent = "Log in";
   loginBtn.disabled = false;
 
   if (error) {
-    loginError.textContent = "Couldn't log in — check your email and password.";
+    console.error("[under1kfinds] Login failed:", error);
+    loginError.textContent = "Couldn't log in — " + error.message;
     loginError.hidden = false;
     return;
   }
+
+  if (!signInData || !signInData.session) {
+    // error was null but Supabase still didn't hand back a session —
+    // surface this instead of silently proceeding.
+    console.error("[under1kfinds] signInWithPassword returned no error but no session either:", signInData);
+    loginError.textContent = "Login didn't return a session. Check the browser console for details.";
+    loginError.hidden = false;
+    return;
+  }
+
+  // Double-check the session is actually readable right after sign-in
+  const { data: sessionCheck, error: sessionError } = await sb.auth.getSession();
+  console.log("[under1kfinds] getSession() immediately after login ->", { sessionCheck, sessionError });
+
+  if (sessionError || !sessionCheck.session) {
+    loginError.textContent = "Signed in, but the session couldn't be confirmed. Check the browser console.";
+    loginError.hidden = false;
+    return;
+  }
+
+  console.log("[under1kfinds] Login confirmed, showing dashboard. User:", sessionCheck.session.user?.email);
   showDashboard();
 });
 
@@ -72,6 +97,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 function showDashboard() {
   loginView.hidden = true;
   dashboardView.hidden = false;
+  console.log("[under1kfinds] showDashboard() -> loginView.hidden:", loginView.hidden, "dashboardView.hidden:", dashboardView.hidden);
   loadProducts();
 }
 
@@ -93,16 +119,32 @@ function goToTab(name) {
 // ---------------------------------------------------------
 // LOAD PRODUCTS (admin sees hidden ones too, via RLS policy)
 // ---------------------------------------------------------
+const globalError = document.getElementById("globalError");
+
+function showGlobalError(message) {
+  globalError.textContent = message;
+  globalError.hidden = false;
+}
+
+function clearGlobalError() {
+  globalError.hidden = true;
+}
+
 async function loadProducts() {
   const { data, error } = await sb
     .from("products")
     .select("*")
     .order("created_at", { ascending: false });
 
+  console.log("[under1kfinds] loadProducts() ->", { rowCount: data?.length, error });
+
   if (error) {
-    console.error(error);
+    // Common cause: an RLS policy on `products` is missing or wrong,
+    // or the session isn't actually authenticated when this query runs.
+    showGlobalError("Couldn't load products from Supabase: " + error.message + " (code: " + (error.code || "unknown") + ")");
     return;
   }
+  clearGlobalError();
   allProducts = data || [];
   renderOverview();
   renderManageList();
@@ -208,12 +250,15 @@ async function uploadImageIfNeeded() {
   const ext = file.name.split(".").pop();
   const path = `product-${Date.now()}.${ext}`;
 
-  const { error: uploadError } = await sb.storage.from("product-images").upload(path, file, {
+  const uploadResult = await sb.storage.from("product-images").upload(path, file, {
     upsert: false,
   });
+  console.log("[under1kfinds] storage.upload() ->", uploadResult);
 
-  if (uploadError) {
-    throw new Error("Image upload failed: " + uploadError.message);
+  if (uploadResult.error) {
+    // Common cause: the `product-images` bucket doesn't exist, or its
+    // INSERT policy for authenticated users is missing (see supabase-setup.sql).
+    throw new Error("Image upload failed: " + uploadResult.error.message);
   }
 
   const { data } = sb.storage.from("product-images").getPublicUrl(path);
@@ -253,15 +298,26 @@ productForm.addEventListener("submit", async (e) => {
       featured: document.getElementById("f_featured").checked,
     };
 
-    let error;
+    let result;
     if (wasEditing) {
-      ({ error } = await sb.from("products").update(payload).eq("id", editingId));
+      result = await sb.from("products").update(payload).eq("id", editingId).select();
     } else {
       payload.hidden = false;
-      ({ error } = await sb.from("products").insert([payload]));
+      result = await sb.from("products").insert([payload]).select();
     }
+    console.log("[under1kfinds] " + (wasEditing ? "update" : "insert") + " products ->", result);
 
-    if (error) throw new Error(error.message);
+    if (result.error) {
+      // Common causes: INSERT/UPDATE RLS policy missing on `products`,
+      // a NOT NULL column left empty, or the session expired mid-form.
+      throw new Error(result.error.message + (result.error.code ? " (code: " + result.error.code + ")" : ""));
+    }
+    if (!result.data || result.data.length === 0) {
+      // No hard error, but nothing came back either — usually means the
+      // row was written but the SELECT-after-write was blocked by RLS,
+      // or, for update, that no row matched editingId.
+      console.warn("[under1kfinds] Write returned no error but no row was returned:", result);
+    }
 
     resetForm();
     formStatus.textContent = wasEditing ? "Changes saved. The public store is updated." : "Product published to the store.";
@@ -327,7 +383,8 @@ function manageCardHTML(p) {
 manageSearch.addEventListener("input", renderManageList);
 
 async function toggleField(id, field, value) {
-  const { error } = await sb.from("products").update({ [field]: value }).eq("id", id);
+  const { error, data } = await sb.from("products").update({ [field]: value }).eq("id", id).select();
+  console.log("[under1kfinds] toggleField()", field, "->", { error, data });
   if (error) {
     alert("Couldn't update product: " + error.message);
     return;
@@ -337,7 +394,8 @@ async function toggleField(id, field, value) {
 
 async function deleteProduct(id, name) {
   if (!confirm(`Delete "${name}"? This can't be undone.`)) return;
-  const { error } = await sb.from("products").delete().eq("id", id);
+  const { error, data } = await sb.from("products").delete().eq("id", id).select();
+  console.log("[under1kfinds] deleteProduct() ->", { error, data });
   if (error) {
     alert("Couldn't delete product: " + error.message);
     return;
@@ -349,3 +407,4 @@ async function deleteProduct(id, name) {
 // INIT
 // ---------------------------------------------------------
 checkSession();
+       
