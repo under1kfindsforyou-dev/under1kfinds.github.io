@@ -113,7 +113,7 @@
     if (url.includes("amazon") || url.includes("amzn")) return "Amazon";
     if (url.includes("savana") || url.includes("urbanic")) return "Savana";
     if (url.includes("flipkart")) return "Flipkart";
-    if (url.includes("myntra")) return "Myntra";
+    if (url.includes("MQ")) return "Myntra";
     try {
       const host = new URL(link).hostname.replace("www.", "");
       const brand = host.split(".")[0];
