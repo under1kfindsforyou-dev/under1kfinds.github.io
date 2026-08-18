@@ -108,19 +108,15 @@
 
   // ---------- retailer detection ----------
   function retailerName(link) {
-    if (!link) return "Retailer";
+    if (!link) return null;
     const url = link.toLowerCase();
     if (url.includes("amazon") || url.includes("amzn")) return "Amazon";
     if (url.includes("savana") || url.includes("urbanic")) return "Savana";
-    if (url.includes("flipkart")) return "Flipkart";
-    if (url.includes("MQ")) return "Myntra";
-    try {
-      const host = new URL(link).hostname.replace("www.", "");
-      const brand = host.split(".")[0];
-      return brand.charAt(0).toUpperCase() + brand.slice(1);
-    } catch {
-      return "Retailer";
-    }
+    if (url.includes("flipkart") || url.includes("fkrt")) return "Flipkart";
+    if (url.includes("myntra")) return "Myntra";
+    // Unknown/shortened domains: don't guess — a wrong guess (e.g. a
+    // link-shortener subdomain) reads worse than a generic label.
+    return null;
   }
 
   // ---------- card markup ----------
@@ -128,6 +124,10 @@
     const discount = computeDiscount(product);
     const primaryCategory = product.category && product.category[0];
     const retailer = retailerName(product.affiliate_link);
+    const ctaLabel = retailer ? `View on ${retailer}` : "View Product";
+    const priceNoteLabel = retailer
+      ? `Price may change on ${retailer}.`
+      : "Price may change on the retailer's site.";
 
     return `
       <article class="card">
@@ -157,12 +157,12 @@
             ${product.mrp ? `<span class="price-mrp">${formatINR(product.mrp)}</span>` : ""}
           </div>
           <a class="cta-btn" href="${product.affiliate_link}" target="_blank" rel="noopener sponsored nofollow">
-            View on ${retailer}
+            ${ctaLabel}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M7 17L17 7"/><path d="M8 7h9v9"/>
             </svg>
           </a>
-          <p class="price-note">Price may change on ${retailer}.</p>
+          <p class="price-note">${priceNoteLabel}</p>
         </div>
       </article>
     `;
@@ -221,4 +221,4 @@
   // ---------- init ----------
   loadProducts();
 })();
-                                                       
+        
