@@ -1,26 +1,26 @@
 /* =========================================================
    UNDER1KFINDS — design tokens
-   Palette: near-black base, cyan primary accent, warm amber
-   reserved only for discount tags (the "deal" signal).
-   Type: Space Grotesk (display) / Inter (body) / JetBrains Mono (numbers)
+   Palette: warm ivory base, ink-black text/CTAs, one restrained
+   gold accent reserved for discount tags and ratings — the
+   signal of a genuine find, not a generic "sale" color.
+   Type: Fraunces (display) / Inter (body) / JetBrains Mono (numbers)
    ========================================================= */
 :root{
-  --bg: #090c0f;
-  --surface: #12171d;
-  --surface-2: #171e26;
-  --border: rgba(255,255,255,0.08);
-  --border-strong: rgba(255,255,255,0.14);
-  --text: #f3f6f9;
-  --text-muted: #8b96a3;
-  --text-faint: #5c6773;
-  --cyan: #2be6e0;
-  --cyan-dim: rgba(43,230,224,0.14);
-  --amber: #ffb547;
-  --amber-dim: rgba(255,181,71,0.14);
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --surface-2: #f4f2ec;
+  --border: rgba(10,10,10,0.10);
+  --border-strong: rgba(10,10,10,0.20);
+  --ink: #0a0a0a;
+  --text: #161614;
+  --text-muted: #6b6862;
+  --text-faint: #a19d93;
+  --gold: #a9803f;
+  --gold-dim: rgba(169,128,63,0.12);
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 8px;
-  --shadow-card: 0 10px 30px -12px rgba(0,0,0,0.55);
+  --shadow-card: 0 12px 30px -14px rgba(10,10,10,0.18);
   --maxw: 720px;
 }
 
@@ -34,7 +34,7 @@ html{ background: var(--bg); }
 
 body{
   margin:0;
-  background: radial-gradient(circle at 50% -10%, #101720 0%, var(--bg) 45%) fixed;
+  background: var(--bg);
   color: var(--text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -46,7 +46,7 @@ button{ font-family: inherit; cursor: pointer; }
 input{ font-family: inherit; }
 
 :focus-visible{
-  outline: 2px solid var(--cyan);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -58,7 +58,7 @@ img{ max-width: 100%; display: block; }
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(9,12,15,0.86);
+  background: rgba(250,249,246,0.90);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
@@ -66,7 +66,7 @@ img{ max-width: 100%; display: block; }
 .header-inner{
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 18px 20px 16px;
+  padding: 20px 20px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -74,19 +74,23 @@ img{ max-width: 100%; display: block; }
 }
 .brand-name{
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: clamp(20px, 5.5vw, 26px);
-  letter-spacing: 0.02em;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: clamp(21px, 5.5vw, 27px);
+  letter-spacing: 0.01em;
   line-height: 1;
+  color: var(--ink);
 }
-.brand-accent{ color: var(--cyan); }
+.brand-accent{
+  color: var(--gold);
+  font-style: italic;
+}
 .brand-tagline{
-  margin: 6px 0 0;
+  margin: 7px 0 0;
   font-size: 13px;
   color: var(--text-muted);
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 .ig-btn{
   flex-shrink: 0;
@@ -96,12 +100,13 @@ img{ max-width: 100%; display: block; }
   place-items: center;
   border-radius: 50%;
   border: 1px solid var(--border-strong);
-  color: var(--text);
-  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  color: var(--ink);
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 .ig-btn:hover{
-  color: var(--cyan);
-  border-color: var(--cyan);
+  color: var(--surface);
+  background: var(--ink);
+  border-color: var(--ink);
   transform: translateY(-1px);
 }
 
@@ -123,8 +128,8 @@ img{ max-width: 100%; display: block; }
   transition: border-color 0.2s ease;
 }
 .search-box:focus-within{
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--ink);
+  color: var(--ink);
 }
 .search-box input{
   flex: 1;
@@ -163,9 +168,9 @@ img{ max-width: 100%; display: block; }
 }
 .cat-pill:hover{ border-color: var(--border-strong); color: var(--text); }
 .cat-pill.active{
-  background: var(--cyan-dim);
-  border-color: var(--cyan);
-  color: var(--cyan);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--surface);
 }
 
 /* ===================== RESULTS META ===================== */
@@ -204,7 +209,7 @@ img{ max-width: 100%; display: block; }
 /* ===================== PRODUCT CARD ===================== */
 .card{
   position: relative;
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -221,7 +226,7 @@ img{ max-width: 100%; display: block; }
 .card-media{
   position: relative;
   aspect-ratio: 1 / 1;
-  background: #0d1216;
+  background: var(--surface-2);
   overflow: hidden;
 }
 .card-media img{
@@ -236,7 +241,7 @@ img{ max-width: 100%; display: block; }
   position: absolute;
   top: 10px;
   left: 10px;
-  background: rgba(9,12,15,0.72);
+  background: rgba(250,249,246,0.88);
   backdrop-filter: blur(6px);
   border: 1px solid var(--border);
   color: var(--text-muted);
@@ -246,14 +251,14 @@ img{ max-width: 100%; display: block; }
   border-radius: 999px;
 }
 
-/* discount "tag" — the signature element: a torn-ticket badge
-   with a punched hole, styled like a real price sticker */
+/* discount "tag" — the signature element: a boutique price
+   sticker in ink black with a fine gold punched hole */
 .discount-tag{
   position: absolute;
   top: 10px;
   right: 10px;
-  background: var(--amber);
-  color: #1a1204;
+  background: var(--ink);
+  color: var(--gold);
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   font-size: 12px;
@@ -278,10 +283,11 @@ img{ max-width: 100%; display: block; }
 
 .card-name{
   margin: 0 0 5px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 16.5px;
-  line-height: 1.25;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.28;
+  color: var(--ink);
 }
 
 .card-desc{
@@ -299,7 +305,7 @@ img{ max-width: 100%; display: block; }
   color: var(--text-muted);
   margin-bottom: 12px;
 }
-.card-rating .stars{ color: var(--amber); letter-spacing: 1px; }
+.card-rating .stars{ color: var(--gold); letter-spacing: 1px; }
 
 /* price row styled like a receipt stub — dashed divider above it */
 .price-row{
@@ -314,7 +320,7 @@ img{ max-width: 100%; display: block; }
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   font-size: 20px;
-  color: var(--cyan);
+  color: var(--ink);
 }
 .price-mrp{
   font-family: 'JetBrains Mono', monospace;
@@ -330,8 +336,8 @@ img{ max-width: 100%; display: block; }
   gap: 8px;
   width: 100%;
   padding: 13px 16px;
-  background: var(--cyan);
-  color: #06201f;
+  background: var(--ink);
+  color: var(--surface);
   font-weight: 600;
   font-size: 14.5px;
   border: none;
@@ -339,8 +345,8 @@ img{ max-width: 100%; display: block; }
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 .cta-btn:hover{
-  background: #4ef1ec;
-  box-shadow: 0 8px 20px -6px rgba(43,230,224,0.45);
+  background: #2a2a26;
+  box-shadow: 0 8px 20px -6px rgba(10,10,10,0.35);
 }
 .cta-btn:active{ transform: scale(0.97); }
 .cta-btn svg{ flex-shrink: 0; }
@@ -364,10 +370,11 @@ img{ max-width: 100%; display: block; }
   text-align: center;
 }
 .footer-brand{
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 17px;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 18px;
   margin: 0;
+  color: var(--ink);
 }
 .footer-tagline{
   color: var(--text-muted);
@@ -382,11 +389,12 @@ img{ max-width: 100%; display: block; }
   color: var(--text-muted);
   margin-bottom: 18px;
 }
-.footer-links a:hover{ color: var(--cyan); }
+.footer-links a:hover{ color: var(--ink); }
 .disclosure{
   font-size: 11.5px;
   color: var(--text-faint);
   line-height: 1.6;
   max-width: 420px;
   margin: 0 auto;
-}
+   }
+     
